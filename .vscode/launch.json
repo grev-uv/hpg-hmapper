@@ -1,0 +1,102 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "1 thread",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceRoot}/bin/hpg-hmapper",
+      "args": [
+        "-mc", "/home/cesar/Documentos/hpg-support/hmc_test_data/mc_alignments.bam",
+        "-hmc", "/home/cesar/Documentos/hpg-support/hmc_test_data/hmc_alignments.bam",
+        //"-t",
+        "-i","/genome/index_bs_previous",
+        "--mc-methyl-stats-file","/home/cesar/Documentos/hpg-support/hmc_test_data/mc_methyl_stats.bin",
+        "--hmc-methyl-stats-file","/home/cesar/Documentos/hpg-support/hmc_test_data/hmc_methyl_stats.bin",
+        "--cpu-threads", "1",
+        "-o","/home/cesar/Documentos/hpg-support/hmc_test_data/out/",
+        "--memory","30G",
+        "--batch-size","1000000",
+        "--output-format","csv"
+      ],
+      "stopAtEntry": true,
+      "cwd": "${workspaceRoot}",
+      "environment": [],
+      "externalConsole": false,
+      "linux": {
+        "MIMode": "gdb"
+      }
+    },
+    {
+      "name": "3 threads",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceRoot}/bin/hpg-hmapper",
+      "args": [
+        "-mc", "/home/cesar/Documentos/hpg-support/hmc_test_data/mc_alignments.bam",
+        "-hmc", "/home/cesar/Documentos/hpg-support/hmc_test_data/hmc_alignments.bam",
+        "--cpu-threads", "3",
+        "-o","/home/cesar/Documentos/hpg-support/hmc_test_data/out/",
+        "--memory","30G",
+        "--batch-size","100000"
+      ],
+      "stopAtEntry": true,
+      "cwd": "${workspaceRoot}",
+      "environment": [],
+      "externalConsole": false,
+      "linux": {
+        "MIMode": "gdb"
+      }
+    },
+    {
+      "name": "4 threads",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceRoot}/bin/hpg-hmapper",
+      "args": [
+        "-mc", "/home/cesar/Documentos/hpg-support/hmc_test_data/mc_alignments.bam",
+        "-hmc", "/home/cesar/Documentos/hpg-support/hmc_test_data/hmc_alignments.bam",
+        //"-t",
+        "-i","/genome/index_bs_previous",
+        "--mc-methyl-stats-file","/home/cesar/Documentos/hpg-support/hmc_test_data/mc_methyl_stats.bin",
+        "--hmc-methyl-stats-file","/home/cesar/Documentos/hpg-support/hmc_test_data/hmc_methyl_stats.bin",
+        "--cpu-threads", "4",
+        "-o","/home/cesar/Documentos/hpg-support/hmc_test_data/out/",
+        "--memory","30G",
+        "--batch-size","4000"
+      ],
+      "stopAtEntry": true,
+      "cwd": "${workspaceRoot}",
+      "environment": [],
+      "externalConsole": false,
+      "linux": {
+        "MIMode": "gdb"
+      }
+    },
+    {
+      "name": "6 threads",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceRoot}/bin/hpg-hmapper",
+      "args": [
+        "-mc", "/home/cesar/Documentos/hpg-support/hmc_test_data/mc_alignments.bam",
+        "-hmc", "/home/cesar/Documentos/hpg-support/hmc_test_data/hmc_alignments.bam",
+        //"-t",
+        "-i","/genome/index_bs_previous",
+        "--mc-methyl-stats-file","/home/cesar/Documentos/hpg-support/hmc_test_data/mc_methyl_stats.bin",
+        "--hmc-methyl-stats-file","/home/cesar/Documentos/hpg-support/hmc_test_data/hmc_methyl_stats.bin",
+        "--cpu-threads", "6",
+        "-o","/home/cesar/Documentos/hpg-support/hmc_test_data/out/",
+        "--memory","30G",
+        "--batch-size","6000"
+      ],
+      "stopAtEntry": true,
+      "cwd": "${workspaceRoot}",
+      "environment": [],
+      "externalConsole": false,
+      "linux": {
+        "MIMode": "gdb"
+      }
+    }
+  ]
+}

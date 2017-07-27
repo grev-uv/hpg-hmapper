@@ -1,0 +1,113 @@
+#!/bin/bash
+
+##############################################################################################
+# This script creates simulated human sequence FASTQ files to test alignment, methylation or
+# hydroximethylation software following this steps:
+#
+# 1. Create two FASTQ files taking reads randomly from the ACT and AGT genome indices
+# 2. Merge both files into a single FASTQ file and replace the C's in the CG isles to
+#    T's following the specified ratio to simulate bisulphite sequencing.
+# 3. Replace the remaining Cs into Ts to simulate TET1 hydroximethylation sequencing.
+# 4. Align the final FASTQ file to obtain the BAM file
+
+##############################################################################################
+
+# This script is part of HPG-Hmapper.
+#
+# HPG-Hmapper is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# HPG-Methyl is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with HPG-Hmapper. If not, see <http://www.gnu.org/licenses/>.
+
+##############################################################################################
+
+# Creator: César González
+# Date: March 2017
+
+# Read lengths of the target FASTQ and BAM files
+LENGTH=( 75 150 400 800 1600 3200 )
+TYPE=( "mc" "hmc" )
+
+# Output paths
+FASTQ_OUT_DIR=""
+BAM_OUT_DIR=""
+
+# Change this to point to the genome FASTA and BWT index files in your system
+GENOME_AGT_FASTA=""
+GENOME_ACT_FASTA=""
+GENOME_INDEX_DIR=""
+
+# Change this to point to the executable paths in your system
+HPG_METHYL_PATH=""
+REPLACE_PATH="./replace"
+DWGSIM_PATH=""
+HMC_SIM_PATH="./hmc_simulator"
+
+# Number of threads to use where applicable
+CPU_THREADS=12
+
+# 5hmC ratio in CG isles
+HMC_RATIO="5.0"
+
+# 5mC ratio outside of CG isles
+MC_RATIO="5.0"
+
+# 5mC ratio inside of CG isles
+MC_CPG_RATIO="95.0"
+
+# Number of different tissues to simulate
+TISSUES="5"
+
+# Build the HMC simulator
+gcc -O3 -fopenmp -msse3 $HMC_SIM_PATH.c -o $HMC_SIM_PATH
+chmod +x $HMC_SIM_PATH
+
+for len in "${LENGTH[@]}"
+do
+	for tp in "${TYPE[@]}"
+	do
+		echo "Type: $tp, Length: $len nt"
+
+		# Generate MC AGT FASTQ file
+		$DWGSIM_PATH -C 60 -1 $len -2 0 -n 0 -R 0 -r 0 -y 0 -e 0 -E 0 -N 2000000 $GENOME_AGT_FASTA $FASTQ_OUT_DIR/4M_${len}nt_AGT_temp &> /dev/null
+
+		# Generate MC ACT FASTQ file
+		$DWGSIM_PATH -C 60 -1 $len -2 0 -n 0 -R 0 -r 0 -y 0 -e 0 -E 0 -N 2000000 $GENOME_ACT_FASTA $FASTQ_OUT_DIR/4M_${len}nt_ACT_temp &> /dev/null
+
+		# Concatenate files and remove temporary files
+		cat $FASTQ_OUT_DIR/4M_${len}nt_AGT_temp.bfast.fastq $FASTQ_OUT_DIR/4M_${len}nt_ACT_temp.bfast.fastq > $FASTQ_OUT_DIR/4M_${len}nt_$tp.fastq
+		rm $FASTQ_OUT_DIR/4M_${len}nt_AGT_temp.bfast.fastq $FASTQ_OUT_DIR/4M_${len}nt_ACT_temp.bfast.fastq
+		rm $FASTQ_OUT_DIR/4M_${len}nt_AGT_temp.bwa.read1.fastq $FASTQ_OUT_DIR/4M_${len}nt_ACT_temp.bwa.read1.fastq
+		rm $FASTQ_OUT_DIR/4M_${len}nt_AGT_temp.bwa.read2.fastq $FASTQ_OUT_DIR/4M_${len}nt_ACT_temp.bwa.read2.fastq
+		rm $FASTQ_OUT_DIR/4M_${len}nt_AGT_temp.mutations.txt $FASTQ_OUT_DIR/4M_${len}nt_ACT_temp.mutations.txt
+
+		# Apply BS sequencing simulation
+		$REPLACE_NEW_PATH/replace_new 1 $FASTQ_OUT_DIR/4M_${len}nt_$tp.fastq $REPLACE_NEW_PATH/cpg_islands_ord.txt $MC_RATIO $MC_CPG_RATIO $TISSUES 10000 &> $FASTQ_OUT_DIR/4M_${len}nt_${tp}_stats.txt
+		mv $FASTQ_OUT_DIR/4M_${len}nt_$tp.fastq_convert.fastq $FASTQ_OUT_DIR/4M_${len}nt_$tp.fastq
+
+		if [ "$tp" == "hmc"  ]; then
+			# Apply TET1 sequencing simulation
+			$HMC_SIM_PATH $FASTQ_OUT_DIR/4M_${len}nt_$tp.fastq $HMC_RATIO >> $FASTQ_OUT_DIR/4M_${len}nt_${tp}_stats.txt
+			mv $FASTQ_OUT_DIR/4M_${len}nt_$tp.fastq_hmc_convert.fastq $FASTQ_OUT_DIR/4M_${len}nt_$tp.fastq
+		fi
+
+		# Map to BAM file
+		$HPG_METHYL_PATH bs -i $GENOME_INDEX_DIR -f $FASTQ_OUT_DIR/4M_${len}nt_$tp.fastq -o $BAM_OUT_DIR/${tp}_bam/${len} --cpu-threads $CPU_THREADS --write-mcontext &>> $FASTQ_OUT_DIR/4M_${len}nt_${tp}_stats.txt
+
+		# Remove unused output files in the BAM file directory
+		rm hpg-aligner.log $BAM_OUT_DIR/${tp}_bam/${len}/Statistics.txt $BAM_OUT_DIR/${tp}_bam/${len}/CHG_context.txt
+		rm $BAM_OUT_DIR/${tp}_bam/${len}/CpG_context.txt $BAM_OUT_DIR/${tp}_bam/${len}/MUT_context.txt $BAM_OUT_DIR/${tp}_bam/${len}/CHH_context.txt
+
+		# Rename output files
+		mv $BAM_OUT_DIR/${tp}_bam/${len}/alignments.bam $BAM_OUT_DIR/${tp}_bam/${len}/4M_${len}nt_${tp}_mcontext.bam
+		mv $BAM_OUT_DIR/${tp}_bam/${len}/methyl_stats.bin $BAM_OUT_DIR/${tp}_bam/${len}/4M_${len}nt_${tp}_methyl_stats.bin
+	done
+done

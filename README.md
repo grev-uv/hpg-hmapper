@@ -35,6 +35,16 @@ For example, to limit memory consumption to 20 GB and create the methylation map
 --memory 20.0G --csv-delimiter , --csv-record-delimiter ;
 ```
 
+Methylation and coverage graphs can be created with the following command:
+
+```
+hpg-hmapper-graph-tool <csv_meth_map> <start_position> <end_position> <samples> <chromosome>
+```
+
+Two publishing-ready EPS plots will be generated with the data relative to the selected range.
+
+Example datasets can be created using the scripts available in the `datasets` directory. Check the directory readme for instructions on how to generate the datasets.
+
 # Output format
 
 The generated methylation maps will be stored as CSV files, one per chromosome and per strand (forward and reverse), with four columns using the following format. All values are zero-indexed:
@@ -90,17 +100,25 @@ In the release section of the repository there is a binary package for Linux x86
 | GNU GSL | libgsl0-dev     | gsl-devel                 |
 | check   | check           | check-devel               |
 
-The Samtools software package is not required but it is recommended to transform and view the input files.
+The Samtools software package is not required but it is recommended to transform and view the input files. The GNUplot package is required to use the graph generation tool.
 
-When all the required software packages are installed, to build a release executable of HPG-Hmapper use the command:
+To build HPG-Hmapper, the graph generator tool and the tools to create the synthetic datasets use the command:
 
 ```
+build-all
+```
+
+When all the required software packages are installed, to build a release executable of only HPG-Hmapper use the commands:
+
+```
+cd hmapper/
 scons
 ```
 
-To build a debug version of HPG-Hmapper, with extended debug messages and optimization disabled use the command:
+To build a debug version of HPG-Hmapper, with extended debug messages and optimization disabled use the commands:
 
 ```
+cd hmapper/
 scons debug=1
 ```
 

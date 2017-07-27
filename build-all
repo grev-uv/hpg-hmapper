@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Build HPG-Hmapper
+cd hmapper/
+scons
+
+# Build the graphing tool
+cd ..
+cd graph-tool/
+g++ main.cpp -w -g -O0 -o hpg-hmapper-graph-tool
+
+# Build the dataset generation tools
+cd ..
+cd datasets/
+gcc -O3 -fopenmp -msse3 hmc_simulator.c -o hmc_simulator
+gcc -O3 -fopenmp -msse3 replace.c -o replace
+
+echo "All build"

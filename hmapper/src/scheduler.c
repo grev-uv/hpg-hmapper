@@ -21,7 +21,7 @@ scheduler_input_t* scheduler_input_init(const char* index_path, const char* meth
                       const char* hmc_read_path, const char* mc_bam_path, const char* hmc_bam_path,
                       const char* output_dir, size_t num_threads, size_t treatment,
                       size_t memory_budget, size_t batch_size, size_t output_type,
-                      char csv_delimiter, char csv_record_delimiter) {
+                      char csv_delimiter, char csv_record_delimiter, size_t quality_cutoff) {
   scheduler_input_t* scheduler = calloc(1, sizeof(scheduler_input_t));
 
   scheduler->num_threads = num_threads;
@@ -45,6 +45,7 @@ scheduler_input_t* scheduler_input_init(const char* index_path, const char* meth
 
   scheduler->csv_delimiter = csv_delimiter;
   scheduler->csv_record_delimiter = csv_record_delimiter;
+  scheduler->quality_cutoff = quality_cutoff;
 
   // If the reference genome index directory is provided, load the
   // chromosome information. If it is not, use the built-in homo

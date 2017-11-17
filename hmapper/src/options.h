@@ -56,6 +56,7 @@
 #define STATS_OUTPUT_CMD_STRING           "--output-format"
 #define CSV_DELIMITER_CMD_STRING          "--csv-delimiter"
 #define CSV_RECORD_DELIMITER_CMD_STRING   "--csv-record-delimiter"
+#define QUALITY_CUTOFF_CMD_STRING         "--quality"
 
 #define OUTPUT_TYPE_TEXT_STR              "text"
 #define OUTPUT_TYPE_CSV_STR               "csv"
@@ -82,6 +83,8 @@ typedef struct options {
 
   char csv_delimiter;         /**< User-specified delimiter for the output CSV columns */
   char csv_record_delimiter;  /**< User-specified delimiter for the output CSV rows */
+
+  size_t quality_cutoff;
 } options_t;
 
 #define MIN_OPTION_COUNT    2   /**< Minimum number of command line arguments */

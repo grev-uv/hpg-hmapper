@@ -57,6 +57,8 @@ typedef struct producer_input {
   double time_sec;                /**< Used for statistic purposes */
   double time_bam_read;           /**< Used for statistic purposes */
   double time_filter_alignment;   /**< Used for statistic purposes */
+
+  size_t quality_cutoff;
 } producer_input_t;
 
 

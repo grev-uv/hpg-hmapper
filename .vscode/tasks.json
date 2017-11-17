@@ -27,12 +27,12 @@
         {
             "taskName": "Build release",
             "args": [
-                "scons debug=0"
+                "cd hmapper && scons debug=0"
             ],
             // Support for error and warning output
             "problemMatcher": {
                 "owner": "cpp",
-                "fileLocation": ["relative", "${workspaceRoot}"],
+                "fileLocation": ["relative", "${workspaceRoot}/hmapper"],
                 "pattern": {
                     "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
                     "file": 1,
@@ -47,12 +47,12 @@
             "taskName": "Build debug",
             "isBuildCommand": true,
             "args": [
-                "scons debug=1"
+                "cd hmapper && scons debug=1"
             ],
             // Support for error and warning output
             "problemMatcher": {
                 "owner": "cpp",
-                "fileLocation": ["relative", "${workspaceRoot}"],
+                "fileLocation": ["relative", "${workspaceRoot}/hmapper"],
                 "pattern": {
                     "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
                     "file": 1,
@@ -66,33 +66,13 @@
         {
             "taskName": "Clean project",
             "args": [
-                "scons -c"
+                "cd hmapper && scons -c"
             ]
         },
         {
             "taskName": "Clean RTL tables",
             "args": [
                 "find . -type f -name '*.expand' -delete"
-            ]
-        },
-        {
-            "taskName": "Create release packages",
-            "args":[
-                "scons package=1"
-            ]
-        },
-        {
-            "taskName": "Verify build against trunk version (simulated)",
-            "isTestCommand": true,
-            "args":[
-                "/home/cesar/Documentos/hpg-test-bam/test_bam_simulated"
-            ]
-        },
-        {
-            "taskName": "Verify build against trunk version (real)",
-            "isTestCommand": true,
-            "args":[
-                "/home/cesar/Documentos/hpg-test-bam/test_bam_real"
             ]
         }
     ]

@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
                 options.hmc_methyl_stats_file, options.mc_bam_file, options.hmc_bam_file, 
                 options.output_directory, options.num_threads, options.treatment,
                 options.memory_budget, options.batch_size, options.stats_output_format, 
-                options.csv_delimiter, options.csv_record_delimiter);
+                options.csv_delimiter, options.csv_record_delimiter, options.quality_cutoff);
 
   // Start the scheduler
   scheduler_run(scheduler, (scheduler_producer_cb_t)producer_stage_step, 

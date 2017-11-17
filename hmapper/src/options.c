@@ -77,6 +77,7 @@ void options_print_usage() {
   printf("--batch-size\t\t\t\tBatch size for the worker queues.\n");
   printf("--csv-delimiter\t\t\t\tDelimiter for the CSV columns\n");
   printf("--csv-record-delimiter\t\t\t\tDelimiter for the CSV rows\n");
+  printf("--quality\t\t\tMinimum quality threshold (QUAL) for the input reads\n");
 }
 
 //------------------------------------------------------------------------------------
@@ -92,6 +93,7 @@ int options_read_cmd(const int argc, char** argv, options_t* options) {
   options->num_threads = omp_get_num_procs();
 
   options->batch_size = 1000000;
+  options->quality_cutoff = 20;
   options->stats_output_format = STATS_OUTPUT_FORMAT_TEXT;
 
   options->csv_delimiter = ' ';
@@ -181,6 +183,14 @@ int options_read_cmd(const int argc, char** argv, options_t* options) {
       if (!strcmp(argv[i], BATCH_SIZE_CMD_STRING)) {
         if (i + 1 < argc) {
           options->batch_size = atoi(argv[i + 1]);
+          ++i;
+        }
+      }
+
+      // Quality cutoff
+      if (!strcmp(argv[i], QUALITY_CUTOFF_CMD_STRING)) {
+        if (i + 1 < argc) {
+          options->quality_cutoff = atoi(argv[i + 1]);
           ++i;
         }
       }

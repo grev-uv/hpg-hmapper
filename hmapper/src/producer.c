@@ -54,6 +54,8 @@ producer_input_t* producer_input_init(scheduler_input_t* scheduler, size_t threa
   producer_input->chr_schedule = malloc(chr_sz);
   memcpy(producer_input->chr_schedule, scheduler->chr_schedule, chr_sz);
 
+  producer_input->quality_cutoff = scheduler->quality_cutoff;
+
   // Copy the methylation statistics to use them in the filtering preprocess
   if (scheduler->methyl_reads) {
     producer_input->methyl_reads[MC_QUEUE_INDEX] = malloc(mth_sz);
@@ -371,6 +373,11 @@ alignment_t* producer_process_alignment(alignment_t* alignment, producer_input_t
       }
 
       if (!found_xm) {
+        meth_test_passed = 0;
+      }
+
+      // Check if the read has the minimum quality threshold
+      if (alignment->map_quality < input->quality_cutoff) {
         meth_test_passed = 0;
       }
     } else {

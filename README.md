@@ -28,6 +28,7 @@ The software is configured to have the best performance in most scenarios, howev
 | `--batch-size` | Aligned read batch size for the application queues | > 10000 | 1000000 |
 | `--csv-delimiter` | Delimiter for the output CSV columns | A single character (\t and \n are accepted) | Space |
 | `--csv-record-delimiter` | Delimiter for the output CSV rows | A single character (\t and \n are accepted) | Line break (`\n`) |
+| `--quality` | Minimum quality cutoff for the input reads | 0~254 | 20 |
 
 For example, to limit memory consumption to 20 GB and create the methylation maps using commas and semicolons as separators, the optional command line parameters would be:
 

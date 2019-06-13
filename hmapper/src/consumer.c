@@ -120,7 +120,7 @@ int consumer_stage_step(void* data, scheduler_input_t* scheduler) {
 void consumer_meth_array_serialize(meth_array_node_t* array, size_t length, 
         FILE* fd, char delimiter, char record_delimiter) {
   uint32_t position = 0;
-  uint8_t c = 0, nc = 0, mc = 0, hmc = 0;
+  uint16_t c = 0, nc = 0, mc = 0, hmc = 0;
 
   for (size_t i = 0; i < length; ++i) {
     position = array[i].position;

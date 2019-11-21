@@ -4,7 +4,7 @@ A parallel software tool for analyzing DNA hydroximethylation data.
 
 Providing two BAM datasets, one generated through bisulphite sequencing (BS-seq) with 5mC information and other generated through TET1 traslocation BS-sequencing (TAB-seq) with 5hmC data, HPG-Hmapper detects and maps the methylated and hydroximethylated regionsm, creating per-chromosome CSV files with a list of all the detected cytosines featuring relevant information and its methylation, hydroximethylation, mutation and coverage information.
 
-There are a compresed executable that runs, as is, under ubuntu 14.04, 16.04 and 18.04 versions. This compiled file is available at [releases page](../../releases).
+There is a binary package for Linux x86_64 systems. This compiled file is available at [releases page](../../releases).
 
 # Usage
 
@@ -88,7 +88,7 @@ When very large datasets (with several hundred million sequences) are being proc
 
 # Building
 
-In the release section of the repository there is a binary package for Linux x86_64 systems.If you are interested in modifying, extending or debugging the software, the following instructions show how to build HPG-Hmapper. To be able to build the software, these software packages must be installed in the system:
+In the [release section](../../releases) of the repository there is a binary package for Linux x86_64 systems. If you are interested in modifying, extending or debugging the software, the following instructions show how to build HPG-Hmapper. To be able to build the software, these software packages must be installed in the system:
 
 | Package | Ubuntu / Debian | Red Hat / Fedora / Centos |
 |:-------:|:---------------:|:-------------------------:|

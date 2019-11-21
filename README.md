@@ -4,7 +4,7 @@ A parallel software tool for analyzing DNA hydroximethylation data.
 
 Providing two BAM datasets, one generated through bisulphite sequencing (BS-seq) with 5mC information and other generated through TET1 traslocation BS-sequencing (TAB-seq) with 5hmC data, HPG-Hmapper detects and maps the methylated and hydroximethylated regionsm, creating per-chromosome CSV files with a list of all the detected cytosines featuring relevant information and its methylation, hydroximethylation, mutation and coverage information.
 
-
+There are a compresed executable that runs, as is, under ubuntu 14.04, 16.04 and 18.04 versions. This compiled file is available at [releases page](../../releases).
 
 # Usage
 
@@ -13,7 +13,7 @@ Starting with two FASTQ files, one with the 5mC sequences and the other with the
 When the alignment and calling process is completed, call HPG-Hmapper to obtain the methylation and hydroximethylation maps with the command:
 
 ```
-hpg-hmapper -mc <path_to_bs_seq.bam> -hmc <path_to_tab_seq.bam> -o <out_path>
+$ hpg-hmapper -mc <path_to_bs_seq.bam> -hmc <path_to_tab_seq.bam> -o <out_path>
 ```
 
 Where `<path_to_bs_seq.bam>` is the BAM file containing the 5mC sequences, `<path_to_tab_seq.bam>` is the BAM file containing the 5 hmC sequences and `<out_path>` is the output directory where the CSV files containing the methylation maps will be stored.
@@ -39,7 +39,7 @@ For example, to limit memory consumption to 20 GB and create the methylation map
 Methylation and coverage graphs can be created with the following command:
 
 ```
-hpg-hmapper-graph-tool <csv_meth_map> <start_position> <end_position> <samples> <chromosome>
+$ hpg-hmapper-graph-tool <csv_meth_map> <start_position> <end_position> <samples> <chromosome>
 ```
 
 Two publishing-ready EPS plots will be generated with the data relative to the selected range.
@@ -101,34 +101,59 @@ In the release section of the repository there is a binary package for Linux x86
 | GNU GSL | libgsl0-dev     | gsl-devel                 |
 | check   | check           | check-devel               |
 
+If the distribution and release of the OS is Ubuntu 16.04 or 18.04, please, take a look at Issues section before compile.
+
 The Samtools software package is not required but it is recommended to transform and view the input files. The GNUplot package is required to use the graph generation tool.
 
 To build HPG-Hmapper, the graph generator tool and the tools to create the synthetic datasets use the command:
 
 ```
-build-all
+$ build-all
 ```
 
 When all the required software packages are installed, to build a release executable of only HPG-Hmapper use the commands:
 
 ```
-cd hmapper/
-scons
+$ cd hmapper/
+$ scons
 ```
 
 To build a debug version of HPG-Hmapper, with extended debug messages and optimization disabled use the commands:
 
 ```
-cd hmapper/
-scons debug=1
+$ cd hmapper/
+$ scons debug=1
 ```
 
 Besides compiling from the command line, the project contains Visual Studio code macros to build, debug and test the application from the IDE.
 
 # Issues
 
-If you find any bugs, issues, want a specific feature added or need help, feel free to add an issue or extend an existing one. Pull requests are welcome.
+Firstly, check the distibution and release of the Operating System:
 
+```
+$ lsb_release -a
+```
+
+If the OS is Ubuntu 16.04 or 18.04, a change is needed to compile properly:
+
+In the file [hmapper/lib/common-libs/containers/test/SConscript](hmapper/lib/common-libs/containers/test/SConscript#L8), the line 8 must be changed
+
+```
+8 LIBS = ['check', 'curl', 'm', 'z', 'rt', 'subunit'],
+```
+
+If the OS is Ubuntu 18.04, an additional change is needed to compile properly:
+
+In the file [hmapper/lib/common-libs/commons/config/libconfig.c](hmapper/lib/common-libs/commons/config/libconfig.c#L37), the line 37 must be commented
+
+```
+37 //#include <xlocale.h>
+```
+
+Finally, it can compile following the steps showed at Building section.
+
+If you find any other bugs, issues, want a specific feature added or need help, feel free to add an issue or extend an existing one. Pull requests are welcome.
 
 
 # License

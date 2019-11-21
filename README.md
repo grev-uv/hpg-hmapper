@@ -135,15 +135,15 @@ Firstly, check the distibution and release of the Operating System:
 $ lsb_release -a
 ```
 
-If the OS is Ubuntu 16.04 or 18.04, a change is needed to compile properly:
+If the OS is Ubuntu 14.04, a change is needed to compile properly:
 
-In the file [hmapper/lib/common-libs/containers/test/SConscript](hmapper/lib/common-libs/containers/test/SConscript#L8), the line 8 must be changed
+In the file [hmapper/lib/common-libs/containers/test/SConscript](hmapper/lib/common-libs/containers/test/SConscript#L8), the line 8 must be changed deleting the 'subunit' element
 
 ```
-8 LIBS = ['check', 'curl', 'm', 'z', 'rt', 'subunit'],
+8 LIBS = ['check', 'curl', 'm', 'z', 'rt'],
 ```
 
-If the OS is Ubuntu 18.04, an additional change is needed to compile properly:
+If the OS is Ubuntu 18.04, a change is needed to compile properly:
 
 In the file [hmapper/lib/common-libs/commons/config/libconfig.c](hmapper/lib/common-libs/commons/config/libconfig.c#L37), the line 37 must be commented
 

@@ -107,7 +107,7 @@ In the [release section](../../releases) of the repository there is a binary pac
 | GNU GSL | libgsl0-dev     | gsl-devel                 |
 | check   | check           | check-devel               |
 
-If the distribution and release of the OS is Ubuntu 16.04 or 18.04, please, take a look at Issues section before compile.
+If the distribution and release of the OS is Ubuntu 14.04 or 18.04, please, take a look at Issues section before compile.
 
 The Samtools software package is not required but it is recommended to transform and view the input files. The GNUplot package is required to use the graph generation tool.
 

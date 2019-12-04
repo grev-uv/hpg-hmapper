@@ -18,6 +18,8 @@ $ hpg-hmapper -mc <path_to_bs_seq.bam> -hmc <path_to_tab_seq.bam> -o <out_path>
 
 Where `<path_to_bs_seq.bam>` is the BAM file containing the 5mC sequences, `<path_to_tab_seq.bam>` is the BAM file containing the 5 hmC sequences and `<out_path>` is the output directory where the CSV files containing the methylation maps will be stored.
 
+When only methylation map is required, an empty hydroximethylated bam file is needed. It is possible to download it [here](bin/map_no_hmc.bam)
+
 The software is configured to have the best performance in most scenarios, however it can be hand-tuned using the following optional command line parameters.
 
 | Parameter | Description | Possible values | Default |

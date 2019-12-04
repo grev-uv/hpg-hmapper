@@ -80,7 +80,9 @@ A **64 bit Intel CPU compatible with SSE4.2** is required. Tests have been condu
 
 #### RAM Memory
 
-The peak memory usage ranged between 1 GB and 8 GB for 40 million sequence datasets, with sequence lengths ranging from 75 to 800nt. However, a minimum of **16 GB** is recommended.
+The peak memory usage ranged between 1 GB and 8 GB for 40 million sequence datasets, with sequence lengths ranging from 75 to 800nt. However, a minimum of **16 GB** is required.
+
+If a memory size smaller than 16 GB is used, then some executions may be aborted with a SIGKILL signal due to memory overflow. These situations can be minimized using the --write-context option if the alignment has been carried out with [hpg-methyl](https://github.com/grev-uv/hpg-methyl).
 
 When very large datasets (with several hundred million sequences) are being processed, the memory usage for the optimum performance can grow up to tens of GB (or even further). The performance / memory consumption ratio can be controlled through optional command line parameters.
 

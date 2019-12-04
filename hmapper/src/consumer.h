@@ -22,23 +22,25 @@
  *   should be done only through the object's public methods.
  */
 typedef struct consumer_input {
-  size_t num_chromosomes;   /**< Number of chromosomes in the current genome. */
-  size_t num_workers;       /**< Number of active workers */
-  size_t thread_id;         /**< Global thread ID of the consumer */
+  size_t num_chromosomes;       /**< Number of chromosomes in the current genome. */
+  size_t num_workers;           /**< Number of active workers */
+  size_t thread_id;             /**< Global thread ID of the consumer */
 
   FILE** meth_map_forward_fd;   /**< PRIVATE File descriptors to the output forward maps */
   FILE** meth_map_reverse_fd;   /**< PRIVATE File descriptors to the output reverse maps */
 
-  size_t total_c;     /**< PRIVATE Used for statistics purposes by the scheduler object */
-  size_t total_mc;    /**< PRIVATE Used for statistics purposes by the scheduler object */
-  size_t total_hmc;   /**< PRIVATE Used for statistics purposes by the scheduler object */
+  size_t total_c;               /**< PRIVATE Used for statistics purposes by the scheduler object */
+  size_t total_mc;              /**< PRIVATE Used for statistics purposes by the scheduler object */
+  size_t total_hmc;             /**< PRIVATE Used for statistics purposes by the scheduler object */
 
-  size_t worker_team_pass; /**< PRIVATE Aggregated stage ID of the worker team. Used to signal
-                                when to start logging to the output files (check scheduler.h). */
-  char csv_delimiter;         /**< PRIVATE User-specified delimiter for each column in the CSV files */
-  char csv_record_delimiter;  /**< PRIVATE User-specified delimiter for each row in the CSV files */
+  size_t worker_team_pass;      /**< PRIVATE Aggregated stage ID of the worker team. Used to signal
+                                     when to start logging to the output files (check scheduler.h). */
+  char csv_delimiter;           /**< PRIVATE User-specified delimiter for each column in the CSV files */
+  char csv_record_delimiter;    /**< PRIVATE User-specified delimiter for each row in the CSV files */
 
-  double time_sec;    /**< PRIVATE Used for timing purposes */
+  double time_sec;              /**< PRIVATE Used for timing purposes */
+  
+  size_t coverage;              /**< Minimum number of reads for each position */
 } consumer_input_t;
 
 
@@ -87,6 +89,11 @@ int consumer_stage_step(void* data, scheduler_input_t* scheduler);
 *  @param       record_delimiter  Delimiter for the CSV rows.
 *  
 */
-void consumer_meth_array_serialize(meth_array_node_t* array, size_t length, FILE* fd, char delimiter, char record_delimiter);
+void consumer_meth_array_serialize(meth_array_node_t* array, 
+                                   size_t length, 
+                                   FILE* fd, 
+                                   char delimiter, 
+                                   char record_delimiter,
+                                   size_t coverage);
 
 #endif // CONSUMER_H

@@ -40,61 +40,64 @@ typedef int (*scheduler_worker_cb_t)(void*, void*);     /**< Callback signature 
  */
 
 typedef struct scheduler_input {
-  size_t num_chromosomes;      /**< Number of chromosomes in the reference genome */
-  size_t num_threads;          /**< Number of threads to use                      */
-  size_t num_workers;          /**< Number of worker processes to use             */
-  uint64_t* chr_length;        /**< Chrosome lengths from the reference genome    */
-  int8_t** thr_schedule;       /**< Per-thread chromosome scheduling matrix       */
-  int8_t* chr_schedule;        /**< Per-chromosome thread index                   */
-  uint32_t* methyl_reads;      /**< Number of reads with methylated C's per
-                                    chromosome. NULL if not present               */
-  uint32_t* hmc_methyl_reads;  /**< Number of reads with hydroximethylated C's per
-                                    chromosome. NULL if not present               */
-  bam_file_t* mc_bam_file;     /**< Input methylation BAM file                    */
-  bam_file_t* hmc_bam_file;    /**< Input hydroximethylation BAM file             */
+  size_t num_chromosomes;                 /**< Number of chromosomes in the reference genome */
+  size_t num_threads;                     /**< Number of threads to use                      */
+  size_t num_workers;                     /**< Number of worker processes to use             */
+  uint64_t* chr_length;                   /**< Chrosome lengths from the reference genome    */
+  int8_t** thr_schedule;                  /**< Per-thread chromosome scheduling matrix       */
+  int8_t* chr_schedule;                   /**< Per-chromosome thread index                   */
+  uint32_t* methyl_reads;                 /**< Number of reads with methylated C's per
+                                               chromosome. NULL if not present               */
+  uint32_t* hmc_methyl_reads;             /**< Number of reads with hydroximethylated C's per
+                                                chromosome. NULL if not present              */
+  bam_file_t* mc_bam_file;                /**< Input methylation BAM file                    */
+  bam_file_t* hmc_bam_file;               /**< Input hydroximethylation BAM file             */
   char* mc_bam_path;
   char* hmc_bam_path;
-  size_t treatment;            /**< Hydroximethylation amplification treatment    */
+  size_t treatment;                       /**< Hydroximethylation amplification treatment    */
 
-  char* output_directory;      /**< Output directory path                         */
-  size_t memory_budget;        /**< Maximum memory that the application should use
-                                    in bytes. The application should never exceed
-                                    this budget when allocating memory. Each module
-                                    is responsible for doing so                   */
+  char* output_directory;                 /**< Output directory path                         */
+  size_t memory_budget;                   /**< Maximum memory that the application should use
+                                               in bytes. The application should never exceed
+                                               this budget when allocating memory. Each module
+                                               is responsible for doing so                   */
 
-  int64_t memory_consumption;   /**< Memory being used by alignment data */
-  float alignment_mean_size;    /**< Mean size of an alignment in bytes */
-  float alignment_length;       /**< Alignment string length in characters */
+  int64_t memory_consumption;             /**< Memory being used by alignment data           */
+  float alignment_mean_size;              /**< Mean size of an alignment in bytes            */
+  float alignment_length;                 /**< Alignment string length in characters         */
 
-  scheduler_producer_cb_t producer_cb;    /**< Pointer to the workflow producer callback */
-  scheduler_consumer_cb_t consumer_cb;    /**< Pointer to the workflow consumer callback */
-  scheduler_worker_cb_t worker_cb;        /**< Pointer to the workflow producer callback */
+  scheduler_producer_cb_t producer_cb;    /**< Pointer to the workflow producer callback     */
+  scheduler_consumer_cb_t consumer_cb;    /**< Pointer to the workflow consumer callback     */
+  scheduler_worker_cb_t worker_cb;        /**< Pointer to the workflow producer callback     */
 
-  struct producer_input* producer_input;  /**< Pointer to the data input structure used by the producer thread */
-  struct consumer_input* consumer_input;  /**< Pointer to the data input structure used by the consumer thread */
+  struct producer_input* producer_input;  /**< Pointer to the data input structure used by the producer thread  */
+  struct consumer_input* consumer_input;  /**< Pointer to the data input structure used by the consumer thread  */
   struct worker_input** worker_input;     /**< Pointers to the data input structures used by the worker threads */
 
-  size_t producer_status;     /**< Status of the producer (STAGE_IN_PROGRESS or STAGE_COMPLETED) */
+  size_t producer_status;                 /**< Status of the producer (STAGE_IN_PROGRESS or STAGE_COMPLETED)    */
   size_t producer_pass_status;
-  size_t consumer_status;     /**< Status of the consumer (STAGE_IN_PROGRESS or STAGE_COMPLETED) */
-  size_t* worker_status;      /**< Status of the workers (STAGE_IN_PROGRESS or STAGE_COMPLETED) */
-  size_t worker_team_status;  /**< Joined status of all the workers (in progress if smaller than the
-                                   number of workers in the team. */
-  size_t worker_team_pass_status;   /**< Joint stage status of the whole worker team */
+  size_t consumer_status;                 /**< Status of the consumer (STAGE_IN_PROGRESS or STAGE_COMPLETED)    */
+  size_t* worker_status;                  /**< Status of the workers (STAGE_IN_PROGRESS or STAGE_COMPLETED)     */
+  size_t worker_team_status;              /**< Joined status of all the workers (in progress if smaller than the
+                                               number of workers in the team.                                   */
+  size_t worker_team_pass_status;         /**< Joint stage status of the whole worker team   */
 
-  static_queue_t** worker_in_queue;    /**< Worker input queues, one per worker thread. Workers fetch
-                                          data from this queue */
+  static_queue_t** worker_in_queue;       /**< Worker input queues, one per worker thread. Workers fetch
+                                               data from this queue                          */
 
-  size_t mc_processed_reads;     /**< Used for global statistics */
-  size_t hmc_processed_reads;    /**< Used for global statistics */
+  size_t mc_processed_reads;              /**< Used for global statistics                    */
+  size_t hmc_processed_reads;             /**< Used for global statistics                    */
 
-  size_t batch_size;       /**< Batch size for the inter-stage queues */
-  size_t output_type;      /**< Output format for the global statistics (text or CSV, check hmc_common.h) */
+  size_t batch_size;                      /**< Batch size for the inter-stage queues         */
+  size_t output_type;                     /**< Output format for the global statistics 
+                                               (text or CSV, check hmc_common.h)             */
 
-  char csv_delimiter;           /**< User-defined delimiter for the CSV columns */
-  char csv_record_delimiter;    /**< User-defined delimiter for the CSV rows */
+  char csv_delimiter;                     /**< User-defined delimiter for the CSV columns    */
+  char csv_record_delimiter;              /**< User-defined delimiter for the CSV rows       */
   
   size_t quality_cutoff;
+
+  size_t coverage;                        /**< User-defined minimum coverage for each methylated position       */
 } scheduler_input_t;
 
 
@@ -118,11 +121,21 @@ typedef struct scheduler_input {
 *  @return                       Pointer to the new scheduler object.
 *  
 */
-scheduler_input_t* scheduler_input_init(const char* index_path, const char* methyl_read_path,
-                      const char* hmc_read_path, const char* mc_bam_path, const char* hmc_bam_path,
-                      const char* output_dir, size_t num_threads, size_t treatment,
-                      size_t memory_budget, size_t batch_size, size_t output_type, 
-                      char csv_delimiter, char csv_record_delimiter, size_t quality_cutoff);
+scheduler_input_t* scheduler_input_init(const char* index_path,
+                                        const char* methyl_read_path,
+                                        const char* hmc_read_path, 
+                                        const char* mc_bam_path,
+                                        const char* hmc_bam_path,
+                                        const char* output_dir,
+                                        size_t num_threads,
+                                        size_t treatment,
+                                        size_t memory_budget, 
+                                        size_t batch_size, 
+                                        size_t output_type, 
+                                        char csv_delimiter, 
+                                        char csv_record_delimiter, 
+                                        size_t quality_cutoff, 
+                                        size_t coverage);
 
 /**
 *  @brief Deallocate a scheduler object.

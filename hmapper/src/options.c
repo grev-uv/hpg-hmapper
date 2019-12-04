@@ -53,6 +53,10 @@ void options_error(const int err) {
     case OPTIONS_EBUDGET:
       printf("Error: The entered memory budget is bigger than the available system memory.\n");
       break;
+
+    case OPTIONS_ENOTCPO:
+      printf("Error: The entered minimum coverage must be an integer number without sign.\n");
+      break;
   }
 }
 
@@ -61,9 +65,9 @@ void options_error(const int err) {
 void options_print_usage() {
   printf("hmc-report\n");
   printf("usage:\n");
-  printf("hmc-report -mc|--mc-bam-input-file=<file> -hmc|--hmc-bam-input-file=<file>");
-  printf(" [--treatment=<int>] [-t|--timing] [--num-threads=<int>] [-i|--bwt-index=<path>] ");
-  printf("[--mc-methyl-stats-file=<file>] [--hmc-methyl-stats-file=<file>] [-o|--output=<path>]\n");
+  printf("hmc-report -mc|--mc-bam-input-file <file> -hmc|--hmc-bam-input-file <file>");
+  printf(" [--treatment=<int>] [-t|--timing] [--num-threads <int>] [-i|--bwt-index <path>] ");
+  printf("[--mc-methyl-stats-file <file>] [--hmc-methyl-stats-file <file>] [-o|--output <path>]\n");
 
   printf("-mc, --mc-bam-input-file\t\tBisulphite treated BAM input\n");
   printf("-hmc, --hmc-bam-input-file\t\tTAB-Seq / OX-Seq treated BAM input\n");
@@ -78,6 +82,7 @@ void options_print_usage() {
   printf("--csv-delimiter\t\t\t\tDelimiter for the CSV columns\n");
   printf("--csv-record-delimiter\t\t\t\tDelimiter for the CSV rows\n");
   printf("--quality\t\t\tMinimum quality threshold (QUAL) for the input reads\n");
+  printf("-c, --coverage\t\t\tMinimum coverage for each metilated position\n");
 }
 
 //------------------------------------------------------------------------------------
@@ -89,14 +94,14 @@ int options_read_cmd(const int argc, char** argv, options_t* options) {
   memset(options, 0, sizeof(options_t));
 
   // Initialize options with default values
-  options->treatment = HMC_MARKER_TAB_SEQ;
+  options->treatment   = HMC_MARKER_TAB_SEQ;
   options->num_threads = omp_get_num_procs();
 
-  options->batch_size = 1000000;
-  options->quality_cutoff = 20;
-  options->stats_output_format = STATS_OUTPUT_FORMAT_TEXT;
-
-  options->csv_delimiter = ' ';
+  options->batch_size           = 1000000;
+  options->quality_cutoff       = 20;
+  options->coverage             = 15;
+  options->stats_output_format  = STATS_OUTPUT_FORMAT_TEXT;
+  options->csv_delimiter        = ' ';
   options->csv_record_delimiter = '\n';
 
   memset(options->hmc_bam_file, 0, MAX_FILENAME_LENGTH);
@@ -121,6 +126,18 @@ int options_read_cmd(const int argc, char** argv, options_t* options) {
       // Compare each input argument with all possible
       // commands
       //
+      // Minimum Coverage
+      if (!strcmp(argv[i], MINIMUM_COVERAGE) || !strcmp(argv[i], MINIMUM_COVERAGE_SHORT)) {
+        if (i + 1 < argc) {
+          options->coverage = atoi(argv[i + 1]);
+          ++i;
+          if (options->coverage < 0) {
+            error = 1;
+            options_error(OPTIONS_ENOTCPO);
+          }
+        }
+      }
+
       // Memory budget
       if (!strcmp(argv[i], MEMORY_BUDGET_CMD_STRING)) {
         if (i + 1 < argc) {

@@ -17,11 +17,21 @@
 
 //-----------------------------------------------------
 
-scheduler_input_t* scheduler_input_init(const char* index_path, const char* methyl_read_path,
-                      const char* hmc_read_path, const char* mc_bam_path, const char* hmc_bam_path,
-                      const char* output_dir, size_t num_threads, size_t treatment,
-                      size_t memory_budget, size_t batch_size, size_t output_type,
-                      char csv_delimiter, char csv_record_delimiter, size_t quality_cutoff) {
+scheduler_input_t* scheduler_input_init(const char* index_path,
+                                        const char* methyl_read_path,
+                                        const char* hmc_read_path, 
+                                        const char* mc_bam_path, 
+                                        const char* hmc_bam_path,
+                                        const char* output_dir, 
+                                        size_t num_threads, 
+                                        size_t treatment,
+                                        size_t memory_budget, 
+                                        size_t batch_size, 
+                                        size_t output_type,
+                                        char csv_delimiter, 
+                                        char csv_record_delimiter, 
+                                        size_t quality_cutoff,
+                                        size_t coverage) {
   scheduler_input_t* scheduler = calloc(1, sizeof(scheduler_input_t));
 
   scheduler->num_threads = num_threads;
@@ -32,20 +42,21 @@ scheduler_input_t* scheduler_input_init(const char* index_path, const char* meth
     scheduler->num_workers = num_threads - 2;
   }
 
-  scheduler->output_directory = strdup(output_dir);
-  scheduler->memory_budget = memory_budget;
-  scheduler->methyl_reads = NULL;
+  scheduler->output_directory     = strdup(output_dir);
+  scheduler->memory_budget        = memory_budget;
+  scheduler->methyl_reads         = NULL;
 
-  scheduler->memory_consumption = 0.0f;
-  scheduler->alignment_mean_size = 0.0f;
-  scheduler->alignment_length = 0.0f;
+  scheduler->memory_consumption   = 0.0f;
+  scheduler->alignment_mean_size  = 0.0f;
+  scheduler->alignment_length     = 0.0f;
 
-  scheduler->batch_size = batch_size;
-  scheduler->output_type = output_type;
+  scheduler->batch_size           = batch_size;
+  scheduler->output_type          = output_type;
 
-  scheduler->csv_delimiter = csv_delimiter;
+  scheduler->csv_delimiter        = csv_delimiter;
   scheduler->csv_record_delimiter = csv_record_delimiter;
-  scheduler->quality_cutoff = quality_cutoff;
+  scheduler->quality_cutoff       = quality_cutoff;
+  scheduler->coverage             = coverage;
 
   // If the reference genome index directory is provided, load the
   // chromosome information. If it is not, use the built-in homo
@@ -98,9 +109,9 @@ scheduler_input_t* scheduler_input_init(const char* index_path, const char* meth
   }
 
   // Open both BAM files
-  scheduler->mc_bam_file = bam_fopen_mode((char*)mc_bam_path, NULL, "r");
+  scheduler->mc_bam_file  = bam_fopen_mode((char*)mc_bam_path, NULL, "r");
   scheduler->hmc_bam_file = bam_fopen_mode((char*)hmc_bam_path, NULL, "r");
-  scheduler->mc_bam_path = (char*)mc_bam_path;
+  scheduler->mc_bam_path  = (char*)mc_bam_path;
   scheduler->hmc_bam_path = (char*)hmc_bam_path;
 
   // Create the worker queues
@@ -110,12 +121,12 @@ scheduler_input_t* scheduler_input_init(const char* index_path, const char* meth
     scheduler->worker_in_queue[i] = static_queue_new(50000);
   }
 
-  scheduler->producer_status = STAGE_IN_PROGRESS;
-  scheduler->consumer_status = STAGE_IN_PROGRESS;
+  scheduler->producer_status    = STAGE_IN_PROGRESS;
+  scheduler->consumer_status    = STAGE_IN_PROGRESS;
   scheduler->worker_team_status = 0;
-  scheduler->worker_status = malloc(scheduler->num_workers * sizeof(size_t));
+  scheduler->worker_status      = malloc(scheduler->num_workers * sizeof(size_t));
   memset(scheduler->worker_status, STAGE_IN_PROGRESS, scheduler->num_workers * sizeof(size_t));
-  scheduler->worker_input = calloc(scheduler->num_workers, sizeof(worker_input_t*));
+  scheduler->worker_input       = calloc(scheduler->num_workers, sizeof(worker_input_t*));
 
   return scheduler;
 }

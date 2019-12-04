@@ -32,6 +32,7 @@
 #define OPTIONS_ETOOFEW   7   /**< Mandatory options have not been set*/
 #define OPTIONS_ETHREAD   8   /**< Tried to use less than three threads */
 #define OPTIONS_EBUDGET   9   /**< Memory budget is over the system memory */
+#define OPTIONS_ENOTCPO  10   /**< Minimum coverage number is not positive */
 
 /**
  * @brief Command line argument strings
@@ -44,7 +45,7 @@
 #define HMC_FILE_CMD_STRING_SHORT         "-hmc"                     /**< Hydroximethylation input file */
 #define TIMING_CMD_STRING                 "--timing"                 /**< Profile timing */
 #define TIMING_CMD_STRING_SHORT           "-t"                       /**< Profile timing */
-#define NUM_THREADS_CMD_STRING            "--cpu-threads"            /**< Thread count */
+#define NUM_THREADS_CMD_STRING            "--num-threads"            /**< Thread count */
 #define INDEX_CMD_STRING                  "--bwt-index"              /**< Path to the genome index */
 #define INDEX_CMD_STRING_SHORT            "-i"                       /**< Path to the genome index */
 #define MC_METH_STATS_CMD_STRING          "--mc-methyl-stats-file"   /**< Methylation per-chromosome stats file */
@@ -57,6 +58,8 @@
 #define CSV_DELIMITER_CMD_STRING          "--csv-delimiter"
 #define CSV_RECORD_DELIMITER_CMD_STRING   "--csv-record-delimiter"
 #define QUALITY_CUTOFF_CMD_STRING         "--quality"
+#define MINIMUM_COVERAGE                  "--coverage"               /**< Minimum number of reads for position */
+#define MINIMUM_COVERAGE_SHORT            "-c"                       /**< Minimum number of reads for position */
 
 #define OUTPUT_TYPE_TEXT_STR              "text"
 #define OUTPUT_TYPE_CSV_STR               "csv"
@@ -73,18 +76,20 @@ typedef struct options {
   char mc_methyl_stats_file[MAX_FILENAME_LENGTH];   /**< Input per-chromosome methylation stats file */
   char hmc_methyl_stats_file[MAX_FILENAME_LENGTH];  /**< Input per-chromosome hydroximethylation stats file */
 
-  size_t treatment;       /**< Marker used for the hydroximethylation treatment */
-  size_t timing;          /**< Is timing enabled? */
-  size_t num_threads;     /**< Thread count */
-  size_t memory_budget;   /**< Maximum ammount of memory in bytes the application can use */
+  size_t treatment;                                 /**< Marker used for the hydroximethylation treatment */
+  size_t timing;                                    /**< Is timing enabled? */
+  size_t num_threads;                               /**< Thread count */
+  size_t memory_budget;                             /**< Maximum ammount of memory in bytes the application can use */
 
-  size_t batch_size;            /**< Batch size for the inter-stage queues */
-  size_t stats_output_format;   /**< Output format for the global statistics (check hmc_common.h) */
+  size_t batch_size;                                /**< Batch size for the inter-stage queues */
+  size_t stats_output_format;                       /**< Output format for the global statistics (check hmc_common.h) */
 
-  char csv_delimiter;         /**< User-specified delimiter for the output CSV columns */
-  char csv_record_delimiter;  /**< User-specified delimiter for the output CSV rows */
+  char csv_delimiter;                               /**< User-specified delimiter for the output CSV columns */
+  char csv_record_delimiter;                        /**< User-specified delimiter for the output CSV rows */
 
   size_t quality_cutoff;
+
+  size_t coverage;                                  /**< Minimum number of reads in each metilated position */
 } options_t;
 
 #define MIN_OPTION_COUNT    2   /**< Minimum number of command line arguments */

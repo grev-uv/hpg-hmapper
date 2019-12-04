@@ -7,18 +7,19 @@ consumer_input_t* consumer_input_init(scheduler_input_t* scheduler, size_t threa
   char map_path[MAX_FILENAME_LENGTH] = { 0 };
   char map_name[128] = { 0 };
 
-  consumer_input_t* ptr = calloc(1, sizeof(consumer_input_t));
+  consumer_input_t* ptr     = calloc(1, sizeof(consumer_input_t));
 
-  ptr->num_chromosomes = scheduler->num_chromosomes;
-  ptr->num_workers = scheduler->num_workers;
-  ptr->thread_id = thread_id;
-  ptr->worker_team_pass = WORKER_FIRST_PASS;
+  ptr->num_chromosomes      = scheduler->num_chromosomes;
+  ptr->num_workers          = scheduler->num_workers;
+  ptr->thread_id            = thread_id;
+  ptr->worker_team_pass     = WORKER_FIRST_PASS;
 
-  ptr->csv_delimiter = scheduler->csv_delimiter;
+  ptr->csv_delimiter        = scheduler->csv_delimiter;
   ptr->csv_record_delimiter = scheduler->csv_record_delimiter;
+  ptr->coverage             = scheduler->coverage;
 
-  ptr->meth_map_forward_fd = calloc(ptr->num_chromosomes, sizeof(FILE*));
-  ptr->meth_map_reverse_fd = calloc(ptr->num_chromosomes, sizeof(FILE*));
+  ptr->meth_map_forward_fd  = calloc(ptr->num_chromosomes, sizeof(FILE*));
+  ptr->meth_map_reverse_fd  = calloc(ptr->num_chromosomes, sizeof(FILE*));
 
   for (size_t i = 0; i < ptr->num_chromosomes; ++i) {
     strcpy(map_path, scheduler->output_directory);
@@ -90,16 +91,24 @@ int consumer_stage_step(void* data, scheduler_input_t* scheduler) {
       current_array_size = scheduler->worker_input[worker]->meth_array_forward_size;
 
       for (size_t chr = 0; chr < input->num_chromosomes && thr_schedule[chr] != -1; ++chr) {
-        consumer_meth_array_serialize(current_array[chr], current_array_size[chr], input->meth_map_forward_fd[thr_schedule[chr]],
-                  input->csv_delimiter, input->csv_record_delimiter);
+        consumer_meth_array_serialize(current_array[chr], 
+                                      current_array_size[chr], 
+                                      input->meth_map_forward_fd[thr_schedule[chr]],
+                                      input->csv_delimiter, 
+                                      input->csv_record_delimiter,
+                                      input->coverage);
       }
 
       current_array = scheduler->worker_input[worker]->meth_array_reverse;
       current_array_size = scheduler->worker_input[worker]->meth_array_reverse_size;
 
       for (size_t chr = 0; chr < input->num_chromosomes && thr_schedule[chr] != -1; ++chr) {
-        consumer_meth_array_serialize(current_array[chr], current_array_size[chr], input->meth_map_reverse_fd[thr_schedule[chr]],
-                  input->csv_delimiter, input->csv_record_delimiter);
+        consumer_meth_array_serialize(current_array[chr], 
+                                      current_array_size[chr], 
+                                      input->meth_map_reverse_fd[thr_schedule[chr]],
+                                      input->csv_delimiter, 
+                                      input->csv_record_delimiter,
+                                      input->coverage);
       }
     }
 
@@ -118,7 +127,7 @@ int consumer_stage_step(void* data, scheduler_input_t* scheduler) {
 //-----------------------------------------------------
 
 void consumer_meth_array_serialize(meth_array_node_t* array, size_t length, 
-        FILE* fd, char delimiter, char record_delimiter) {
+        FILE* fd, char delimiter, char record_delimiter, size_t coverage) {
   uint32_t position = 0;
   uint16_t c = 0, nc = 0, mc = 0, hmc = 0;
 
@@ -129,9 +138,13 @@ void consumer_meth_array_serialize(meth_array_node_t* array, size_t length,
     mc = array[i].mc_count;
     hmc = array[i].hmc_count;
 
-    fprintf(fd, "%u%c%u%c%u%c%u%c%u%c", position, delimiter, 
-        c, delimiter, nc, delimiter, 
+    if (c + mc > coverage || c + hmc > coverage) {
+      fprintf(fd, "%u%c%u%c%u%c%u%c%u%c", 
+        position, delimiter, 
+        c, delimiter, 
+        nc, delimiter, 
         mc, delimiter, 
         hmc, record_delimiter);
+    }
   }
 }

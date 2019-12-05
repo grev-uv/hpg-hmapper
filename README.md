@@ -4,13 +4,13 @@ A parallel software tool for analyzing DNA hydroximethylation data.
 
 If you want to use this tool just now, there is an executable file for Linux x86_64 systems. This compressed file is available at [releases page](../../releases).
 
-Providing two BAM datasets, one generated through bisulphite sequencing (BS-seq) with 5mC information and other generated through TET1 traslocation BS-sequencing (TAB-seq) with 5hmC data, HPG-Hmapper detects and maps the methylated and hydroximethylated regionsm, creating per-chromosome CSV files with a list of all the detected cytosines featuring relevant information and its methylation, hydroximethylation, mutation and coverage information.
+Providing two BAM datasets, one generated through bisulphite sequencing (BS-seq) with 5mC information and other generated through TET1 traslocation BS-sequencing (TAB-seq) with 5hmC data, HPG-Hmapper detects and maps the methylated and hydroxymethylated regionsm, creating per-chromosome CSV files with a list of all the detected cytosines featuring relevant information and its methylation, hydroxymethylation, mutation and coverage information.
 
 # Usage
 
 Starting with two FASTQ files, one with the 5mC sequences and the other with the 5hmC sequences, the first step is aligning them to the reference genome and performing the methylation call. Our recommended software tool for this step is [HPG-Methyl](https://github.com/grev-uv/hpg-methyl). However, other aligners and methylation callers compatible with the Bismark output format can be used.
 
-When the alignment and calling process is completed, call HPG-Hmapper to obtain the methylation and hydroximethylation maps with the command:
+When the alignment and calling process is completed, call HPG-Hmapper to obtain the methylation and hydroxymethylation maps with the command:
 
 ```
 $ hpg-hmapper -mc <path_to_bs_seq.bam> -hmc <path_to_tab_seq.bam> -o <out_path>
@@ -18,7 +18,7 @@ $ hpg-hmapper -mc <path_to_bs_seq.bam> -hmc <path_to_tab_seq.bam> -o <out_path>
 
 Where `<path_to_bs_seq.bam>` is the BAM file containing the 5mC sequences, `<path_to_tab_seq.bam>` is the BAM file containing the 5 hmC sequences and `<out_path>` is the output directory where the CSV files containing the methylation maps will be stored.
 
-When only methylation map is required, an empty hydroximethylated bam file is needed. It is possible to download it [here](hmapper/bin/)
+When only methylation map is required, an empty hydroxymethylated bam file is needed. It is possible to download it [here](hmapper/bin/)
 
 The software is configured to have the best performance in most scenarios, however it can be hand-tuned using the following optional command line parameters.
 
@@ -60,7 +60,7 @@ The generated methylation maps will be stored as CSV files, one per chromosome a
 | #C | Number of non-methylated cytosines in the position | ≥ 0 |
 | #non-C | Number of overlapping non-cytosines in the position | ≥ 0 |
 | #5mC | Number of 5-methylated cytosines in the position | ≥ 0 |
-| #5hmC | Number of 5-hydroximethylated cytosines in the position | ≥ 0 |
+| #5hmC | Number of 5-hydroxymethylated cytosines in the position | ≥ 0 |
 
 An example output, using tabulators and line breaks as separators would be:
 

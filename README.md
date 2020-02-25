@@ -4,7 +4,7 @@ A parallel software tool for analyzing DNA hydroximethylation data.
 
 If you want to use this tool just now, there is an executable file for Linux x86_64 systems. This compressed file is available at [releases page](../../releases).
 
-Providing two BAM datasets, one generated through bisulphite sequencing (BS-seq) with 5mC information and other generated through TET1 traslocation BS-sequencing (TAB-seq) with 5hmC data, HPG-Hmapper detects and maps the methylated and hydroxymethylated regionsm, creating per-chromosome CSV files with a list of all the detected cytosines featuring relevant information and its methylation, hydroxymethylation, mutation and coverage information.
+Providing two BAM datasets, one generated through bisulphite sequencing (BS-seq) with 5mC information and other generated through TET1 traslocation BS-sequencing (TAB-seq) with 5hmC data, HPG-Hmapper detects and maps the methylated and hydroxymethylated regions, creating per-chromosome CSV files with a list of all the detected cytosines featuring relevant information and its methylation, hydroxymethylation, mutation and coverage information.
 
 # Usage
 
@@ -52,7 +52,7 @@ Example datasets can be created using the scripts available in the `datasets` di
 
 # Output format
 
-The generated methylation maps will be stored as CSV files, one per chromosome and per strand (forward and reverse), with four columns using the following format. All values are zero-indexed:
+The generated methylation maps will be stored as CSV files, one per chromosome and per strand (forward, reverse and mix), with four columns using the following format. All values are zero-indexed:
 
 | Name | Description | Possible values |
 |:----:|:-----------:|:---------------:|

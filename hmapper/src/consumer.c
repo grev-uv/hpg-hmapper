@@ -20,6 +20,7 @@ consumer_input_t* consumer_input_init(scheduler_input_t* scheduler, size_t threa
 
   ptr->meth_map_forward_fd  = calloc(ptr->num_chromosomes, sizeof(FILE*));
   ptr->meth_map_reverse_fd  = calloc(ptr->num_chromosomes, sizeof(FILE*));
+  ptr->meth_map_mix_fd      = calloc(ptr->num_chromosomes, sizeof(FILE*));
 
   for (size_t i = 0; i < ptr->num_chromosomes; ++i) {
     strcpy(map_path, scheduler->output_directory);
@@ -33,6 +34,12 @@ consumer_input_t* consumer_input_init(scheduler_input_t* scheduler, size_t threa
     strcat(map_path, map_name);
 
     ptr->meth_map_reverse_fd[i] = fopen(map_path, "w");
+
+    strcpy(map_path, scheduler->output_directory);
+    snprintf(map_name, 128, "methylation_map_mix_%lu.csv", i + 1);
+    strcat(map_path, map_name);
+
+    ptr->meth_map_mix_fd[i] = fopen(map_path, "w");
   }
 
   ptr->time_sec = 0.0;
@@ -59,6 +66,14 @@ void consumer_input_free(consumer_input_t* consumer_input) {
 
       free(consumer_input->meth_map_reverse_fd);
     }
+
+    if (consumer_input->meth_map_mix_fd) {
+      for (size_t i = 0; i < consumer_input->num_chromosomes; ++i) {
+        fclose(consumer_input->meth_map_mix_fd[i]);
+      }
+
+      free(consumer_input->meth_map_mix_fd);
+    }
   
     free(consumer_input);
   }
@@ -71,8 +86,10 @@ int consumer_stage_step(void* data, scheduler_input_t* scheduler) {
 
   consumer_input_t* input = (consumer_input_t*)data;
 
-  meth_array_node_t** current_array = NULL;
-  size_t* current_array_size = NULL;
+  meth_array_node_t** current_array_f = NULL;
+  size_t* current_array_f_size = NULL;
+  meth_array_node_t** current_array_r = NULL;
+  size_t* current_array_r_size = NULL;
   int8_t* thr_schedule = NULL;
   int8_t chromosome = 0;
 
@@ -87,28 +104,39 @@ int consumer_stage_step(void* data, scheduler_input_t* scheduler) {
     for (size_t worker = 0; worker < input->num_workers; ++worker) {
       thr_schedule = scheduler->worker_input[worker]->thr_schedule;
 
-      current_array = scheduler->worker_input[worker]->meth_array_forward;
-      current_array_size = scheduler->worker_input[worker]->meth_array_forward_size;
+      current_array_f      = scheduler->worker_input[worker]->meth_array_forward;
+      current_array_f_size = scheduler->worker_input[worker]->meth_array_forward_size;
 
       for (size_t chr = 0; chr < input->num_chromosomes && thr_schedule[chr] != -1; ++chr) {
-        consumer_meth_array_serialize(current_array[chr], 
-                                      current_array_size[chr], 
+        consumer_meth_array_serialize(current_array_f[chr], 
+                                      current_array_f_size[chr], 
                                       input->meth_map_forward_fd[thr_schedule[chr]],
                                       input->csv_delimiter, 
                                       input->csv_record_delimiter,
                                       input->coverage);
       }
 
-      current_array = scheduler->worker_input[worker]->meth_array_reverse;
-      current_array_size = scheduler->worker_input[worker]->meth_array_reverse_size;
+      current_array_r      = scheduler->worker_input[worker]->meth_array_reverse;
+      current_array_r_size = scheduler->worker_input[worker]->meth_array_reverse_size;
 
       for (size_t chr = 0; chr < input->num_chromosomes && thr_schedule[chr] != -1; ++chr) {
-        consumer_meth_array_serialize(current_array[chr], 
-                                      current_array_size[chr], 
+        consumer_meth_array_serialize(current_array_r[chr], 
+                                      current_array_r_size[chr], 
                                       input->meth_map_reverse_fd[thr_schedule[chr]],
                                       input->csv_delimiter, 
                                       input->csv_record_delimiter,
                                       input->coverage);
+      }
+
+      for (size_t chr = 0; chr < input->num_chromosomes && thr_schedule[chr] != -1; ++chr) {
+        consumer_meth_array_serialize_mix(current_array_f[chr], 
+                                          current_array_f_size[chr], 
+                                          current_array_r[chr], 
+                                          current_array_r_size[chr], 
+                                          input->meth_map_mix_fd[thr_schedule[chr]],
+                                          input->csv_delimiter, 
+                                          input->csv_record_delimiter,
+                                          input->coverage);
       }
     }
 
@@ -146,5 +174,84 @@ void consumer_meth_array_serialize(meth_array_node_t* array, size_t length,
         mc, delimiter, 
         hmc, record_delimiter);
     }
+  }
+}
+
+//-----------------------------------------------------
+
+void consumer_meth_array_serialize_mix(meth_array_node_t* array_f, 
+                                       size_t length_f, 
+                                       meth_array_node_t* array_r, 
+                                       size_t length_r, 
+                                       FILE* fd, 
+                                       char delimiter, 
+                                       char record_delimiter, 
+                                       size_t coverage) {
+  uint32_t position = 0;
+  uint16_t c = 0, nc = 0, mc = 0, hmc = 0;
+
+  uint32_t idx_f = 0, idx_r = 0;
+  uint32_t position_f = 0, position_r = 0;
+  uint32_t last_position = array_f[length_f - 1].position;
+  if (last_position < array_r[length_r - 1].position)
+    last_position = array_r[length_r - 1].position;
+  
+  position_f = array_f[idx_f].position;
+  position_r = array_r[idx_r].position;
+
+  while (position <= last_position) {
+    // assign values
+    if (position_f < position_r) {
+      position = array_f[idx_f].position;
+      c        = array_f[idx_f].c_count;
+      nc       = array_f[idx_f].nc_count;
+      mc       = array_f[idx_f].mc_count;
+      hmc      = array_f[idx_f].hmc_count;
+
+      idx_f++;
+    }
+    else if (position_f > position_r) {
+      position = array_r[idx_r].position;
+      c        = array_r[idx_r].c_count;
+      nc       = array_r[idx_r].nc_count;
+      mc       = array_r[idx_r].mc_count;
+      hmc      = array_r[idx_r].hmc_count;
+
+      idx_r++;
+    }
+    else {
+      position = array_r[idx_r].position;
+      c        = array_r[idx_r].c_count   + array_f[idx_f].c_count;
+      nc       = array_r[idx_r].nc_count  + array_f[idx_f].nc_count;
+      mc       = array_r[idx_r].mc_count  + array_f[idx_f].mc_count;
+      hmc      = array_r[idx_r].hmc_count + array_f[idx_f].hmc_count;
+
+      idx_f++;
+      idx_r++;
+    }
+
+    // write the position and coverage in file
+    if (c + mc > coverage || c + hmc > coverage) {
+      fprintf(fd, "%u%c%u%c%u%c%u%c%u%c", 
+        position, delimiter, 
+        c, delimiter, 
+        nc, delimiter, 
+        mc, delimiter, 
+        hmc, record_delimiter);
+    }
+
+    // index control
+    if (idx_f >= length_f)
+      position_f = last_position + 1;
+    else
+      position_f = array_f[idx_f].position;
+
+    if (idx_r >= length_r)
+      position_r = last_position + 1;
+    else
+      position_r = array_r[idx_r].position;
+ 
+    if (idx_f >= length_f && idx_r >= length_r)
+      position = last_position + 1;
   }
 }

@@ -28,6 +28,7 @@ typedef struct consumer_input {
 
   FILE** meth_map_forward_fd;   /**< PRIVATE File descriptors to the output forward maps */
   FILE** meth_map_reverse_fd;   /**< PRIVATE File descriptors to the output reverse maps */
+  FILE** meth_map_mix_fd;       /**< PRIVATE File descriptors to the output forward reverse mixed maps */
 
   size_t total_c;               /**< PRIVATE Used for statistics purposes by the scheduler object */
   size_t total_mc;              /**< PRIVATE Used for statistics purposes by the scheduler object */
@@ -40,7 +41,7 @@ typedef struct consumer_input {
 
   double time_sec;              /**< PRIVATE Used for timing purposes */
   
-  size_t coverage;              /**< Minimum number of reads for each position */
+  size_t coverage;              /**< Minimum number of reads for each position to write in a file*/
 } consumer_input_t;
 
 
@@ -95,5 +96,14 @@ void consumer_meth_array_serialize(meth_array_node_t* array,
                                    char delimiter, 
                                    char record_delimiter,
                                    size_t coverage);
+
+void consumer_meth_array_serialize_mix(meth_array_node_t* array_f, 
+                                       size_t length_f, 
+                                       meth_array_node_t* array_r, 
+                                       size_t length_r, 
+                                       FILE* fd, 
+                                       char delimiter, 
+                                       char record_delimiter,
+                                       size_t coverage);
 
 #endif // CONSUMER_H

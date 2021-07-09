@@ -157,21 +157,25 @@ int consumer_stage_step(void* data, scheduler_input_t* scheduler) {
 void consumer_meth_array_serialize(meth_array_node_t* array, size_t length, 
         FILE* fd, char delimiter, char record_delimiter, size_t coverage) {
   uint32_t position = 0;
-  uint16_t c = 0, nc = 0, mc = 0, hmc = 0;
+  uint16_t c = 0, nc = 0, mc = 0, ch = 0, nch = 0, hmc = 0;
 
   for (size_t i = 0; i < length; ++i) {
     position = array[i].position;
-    c = array[i].c_count;
-    nc = array[i].nc_count;
-    mc = array[i].mc_count;
+    c   = array[i].c_count;
+    nc  = array[i].nc_count;
+    mc  = array[i].mc_count;
+    ch  = array[i].ch_count;
+    nch = array[i].nch_count;
     hmc = array[i].hmc_count;
 
-    if (c + mc > coverage || c + hmc > coverage) {
-      fprintf(fd, "%u%c%u%c%u%c%u%c%u%c", 
+    if (c + mc > coverage || ch + hmc > coverage) {
+      fprintf(fd, "%u%c%u%c%u%c%u%c%u%c%u%c%u%c", 
         position, delimiter, 
         c, delimiter, 
         nc, delimiter, 
         mc, delimiter, 
+        ch, delimiter,
+        nch, delimiter,
         hmc, record_delimiter);
     }
   }
@@ -188,7 +192,7 @@ void consumer_meth_array_serialize_mix(meth_array_node_t* array_f,
                                        char record_delimiter, 
                                        size_t coverage) {
   uint32_t position = 0;
-  uint16_t c = 0, nc = 0, mc = 0, hmc = 0;
+  uint16_t c = 0, nc = 0, mc = 0, ch = 0, nch = 0, hmc = 0;
 
   uint32_t idx_f = 0, idx_r = 0;
   uint32_t position_f = 0, position_r = 0;
@@ -206,6 +210,8 @@ void consumer_meth_array_serialize_mix(meth_array_node_t* array_f,
       c        = array_f[idx_f].c_count;
       nc       = array_f[idx_f].nc_count;
       mc       = array_f[idx_f].mc_count;
+      ch       = array_f[idx_f].ch_count;
+      nch      = array_f[idx_f].nch_count;
       hmc      = array_f[idx_f].hmc_count;
 
       idx_f++;
@@ -215,6 +221,8 @@ void consumer_meth_array_serialize_mix(meth_array_node_t* array_f,
       c        = array_r[idx_r].c_count;
       nc       = array_r[idx_r].nc_count;
       mc       = array_r[idx_r].mc_count;
+      ch       = array_r[idx_f].ch_count;
+      nch      = array_r[idx_f].nch_count;
       hmc      = array_r[idx_r].hmc_count;
 
       idx_r++;
@@ -224,6 +232,8 @@ void consumer_meth_array_serialize_mix(meth_array_node_t* array_f,
       c        = array_r[idx_r].c_count   + array_f[idx_f].c_count;
       nc       = array_r[idx_r].nc_count  + array_f[idx_f].nc_count;
       mc       = array_r[idx_r].mc_count  + array_f[idx_f].mc_count;
+      ch       = array_r[idx_r].ch_count  + array_f[idx_f].ch_count;
+      nch      = array_r[idx_r].nch_count + array_f[idx_f].nch_count;
       hmc      = array_r[idx_r].hmc_count + array_f[idx_f].hmc_count;
 
       idx_f++;
@@ -231,12 +241,14 @@ void consumer_meth_array_serialize_mix(meth_array_node_t* array_f,
     }
 
     // write the position and coverage in file
-    if (c + mc > coverage || c + hmc > coverage) {
-      fprintf(fd, "%u%c%u%c%u%c%u%c%u%c", 
+    if (c + mc > coverage || ch + hmc > coverage) {
+      fprintf(fd, "%u%c%u%c%u%c%u%c%u%c%u%c%u%c", 
         position, delimiter, 
         c, delimiter, 
         nc, delimiter, 
         mc, delimiter, 
+        ch, delimiter,
+        nch, delimiter,
         hmc, record_delimiter);
     }
 

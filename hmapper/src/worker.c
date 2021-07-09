@@ -318,16 +318,28 @@ void worker_process_alignment(worker_input_t* worker, alignment_t* alignment, si
               current_node->hmc_count++;
             }
           } else {
-            current_node->c_count++;
+            if (alignment->methylation_type == MC_QUEUE_INDEX) {
+              current_node->c_count++;
+            } else {
+              current_node->ch_count++;
+            }
           }
         } else {
           if (strand == STRAND_FORWARD) {
             if (seq_base != 'C') {
-              current_node->nc_count++;
+              if (alignment->methylation_type == MC_QUEUE_INDEX) {
+                current_node->nc_count++;
+              } else {
+                current_node->nch_count++;
+              }
             }
           } else {
             if (seq_base != 'G') {
-              current_node->nc_count++;
+              if (alignment->methylation_type == MC_QUEUE_INDEX) {
+                current_node->nc_count++;
+              } else {
+                current_node->nch_count++;
+              }
             }
           }
         }

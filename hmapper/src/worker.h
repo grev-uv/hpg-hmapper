@@ -20,9 +20,11 @@
  */
 typedef struct __attribute__((__packed__)) meth_array_node {
   uint32_t position;    /* Position in the chromosome */
-  uint16_t c_count;      /* Number of total cytosines  */
-  uint16_t nc_count;     /* Number of non-methylated cytosines */
+  uint16_t c_count;      /* Number of non-methylated cytosines */
+  uint16_t nc_count;     /* Number of overlaping non-cytosines (5mC)*/
   uint16_t mc_count;     /* Number of 5-mC cytosines   */
+  uint16_t ch_count;     /* Number of non-hydroxymethylated cytosines */
+  uint16_t nch_count;    /* Number of overlaping non-cytosines (5hmC)*/
   uint16_t hmc_count;    /* Number of 5-hmC cytosines  */
 } meth_array_node_t;
 

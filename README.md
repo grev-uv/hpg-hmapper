@@ -52,24 +52,26 @@ Example datasets can be created using the scripts available in the `datasets` di
 
 # Output format
 
-The generated methylation maps will be stored as CSV files, one per chromosome and per strand (forward, reverse and mix), with four columns using the following format. All values are zero-indexed:
+The generated methylation maps will be stored as CSV files, one per chromosome and per strand (forward, reverse and mix), with seven columns using the following format. All values are zero-indexed:
 
 | Name | Description | Possible values |
 |:----:|:-----------:|:---------------:|
 | Position | Genome position in the chromosome | 0 ~ chromosome length minus one |
 | #C | Number of non-methylated cytosines in the position | ≥ 0 |
-| #non-C | Number of overlapping non-cytosines in the position | ≥ 0 |
+| #non-C | Number of overlapping non-cytosines, from 5mC files, in the position | ≥ 0 |
 | #5mC | Number of 5-methylated cytosines in the position | ≥ 0 |
+| #Ch | Number of non-hydroxymethylated cytosines in the position | ≥ 0 |
+| #non-Ch | Number of overlapping non-cytosines, from 5hmC files, in the position | ≥ 0 |
 | #5hmC | Number of 5-hydroxymethylated cytosines in the position | ≥ 0 |
 
 An example output, using tabulators and line breaks as separators would be:
 
-`methylation_map_forward_1.csv`
+`methylation_map_mix_13.csv`
 ```
-10723   4     249   0     5
-10724   191   9     28    26
-10726   207   0     109   137
-10727   89    0     59    246
+19778560 0 13 71 1 14 28
+19778561 71 13 0 27 14 2
+19778565 14 0 74 15 0 31
+19778566 75 13 2 27 14 3
 ```
 
 

@@ -109,7 +109,7 @@ In the [release section](../../releases) of the repository there is a binary pac
 | GNU GSL | libgsl0-dev     | gsl-devel                 |
 | check   | check           | check-devel               |
 
-If the distribution and release of the OS is Ubuntu 14.04 or 18.04, please, take a look at Issues section before compile.
+If the distribution and release of the OS is Ubuntu 14.04, 18.04 or 20.04, please, take a look at Issues section before compile.
 
 The Samtools software package is not required but it is recommended to transform and view the input files. The GNUplot package is required to use the graph generation tool.
 
@@ -151,7 +151,7 @@ In the file [hmapper/lib/common-libs/containers/test/SConscript](hmapper/lib/com
 8 LIBS = ['check', 'curl', 'm', 'z', 'rt'],
 ```
 
-If the OS is Ubuntu 18.04, a change is needed to compile properly:
+If the OS is Ubuntu 18.04 or 20.04, a change is needed to compile properly:
 
 In the file [hmapper/lib/common-libs/commons/config/libconfig.c](hmapper/lib/common-libs/commons/config/libconfig.c#L37), the line 37 must be commented
 

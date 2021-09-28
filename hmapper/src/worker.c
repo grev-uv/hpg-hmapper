@@ -224,7 +224,76 @@ void worker_process_alignment(worker_input_t* worker, alignment_t* alignment, si
     size_t compressed_position = alignment->position / 8;
 	  size_t mask = alignment->position % 8;
 
-    for (size_t i = 0; i < length; ++i) {
+	  //RICARDO - Incorporando el cigar
+	  int cont, pos=0, operations, num;
+	  int offset = 0, current_offset=0;
+	  char car;
+	  int inser = 0;
+	  int pos_mod = 0;
+	  char *cigar = strdup(alignment->cigar);
+	  for (operations = 0; operations < alignment->num_cigar_operations; operations++) {
+	      sscanf(&cigar[offset], "%i%c%n", &num, &car, &current_offset);
+	      offset += current_offset;
+
+	      if (car == 'M' || car == '=' || car == 'X') {
+	        for (cont = 0; cont < num; cont++, pos++, pos_mod++) {
+
+	        	//alignment->sequence_mod[pos_mod] = alignment->sequence[pos];
+	        	//alignment->sequence_met[pos_mod] = sequence[pos];
+
+
+	        	 if (sequence[pos] != XM_NON_RELEVANT) {
+	        	        #ifdef DEBUG
+	        	        if (compressed_position >= array_size) {
+	        	          printf("Warning! Pc (%lu) < N (%lu)\n", compressed_position, array_size);
+	        	          raise(SIGINT);
+	        	        }
+	        	        #endif
+
+	        	        current_map[compressed_position] |= bit_map_mask[mask];
+	        	      }
+
+	        		    if (mask == 7) {
+	        		      ++compressed_position;
+	        			    mask = 0;
+	        		    } else {
+	        			    ++mask;
+	        		    }
+
+	        }
+
+	   }
+	    else{
+	    	   if (car == 'D' || car == 'N') {
+	    		   for (cont = 0; cont < num; cont++, pos_mod++) {
+
+	    			  // alignment->sequence_mod[pos_mod] = 'D';
+	    			  // alignment->sequence_met[pos_mod] = '.';
+
+	    			   	   	   if (mask == 7) {
+	    			  	             ++compressed_position;
+	    			  	       	    mask = 0;
+	    			  	       } else {
+	    			  	       	    ++mask;
+	    			  	       }
+	    	   }
+
+	      }
+	      else {
+	    	       if (car == 'I' || car == 'H' || car == 'S') {
+	    	           pos+=num;
+
+	    	       }
+	    	   }
+
+
+	  }
+	  }
+
+	  free(cigar);
+
+
+	 /* for (size_t i = 0; i < length; ++i) {
       if (sequence[i] != XM_NON_RELEVANT) {
         #ifdef DEBUG
         if (compressed_position >= array_size) {
@@ -242,7 +311,7 @@ void worker_process_alignment(worker_input_t* worker, alignment_t* alignment, si
 	    } else {
 		    ++mask;
 	    }
-    }
+    }*/
 
     worker->first_stage_process += omp_get_wtime() - start_time;
   } else if (pass_id == WORKER_SECOND_PASS) {
@@ -281,13 +350,13 @@ void worker_process_alignment(worker_input_t* worker, alignment_t* alignment, si
     // Search the left-most closest entry to the interval created by
     // the alignment position and its length
     current_node = worker_meth_array_find(current_array, array_size, alignment->position, &current_position);
-
+    current_position++;	//Por coherencia, avanzamos el siguiente índice
     // If the selected node isn't inside the alignment interval, advance the node
     // until it is inside or until the node gets out of the interval. If it is out
     // of the interval, assume that it doesn't have any relevant hit and skip the
     // alignment.
     if (current_node->position < alignment->position) {
-      while (current_node->position < alignment->position && current_position < array_size - 1) {
+      while (current_node->position < alignment->position && current_position < array_size + 1) {/*+1, no -1*/
         current_node = &current_array[current_position++];
       }
 
@@ -296,6 +365,51 @@ void worker_process_alignment(worker_input_t* worker, alignment_t* alignment, si
       }
     }
 
+
+    //RICARDO - Incorporando el cigar
+    	  int cont, pos=0, operations, num;
+    	  int offset = 0, current_offset=0;
+    	  char car;
+    	  int inser = 0;
+    	  int pos_mod = 0;
+    	  char *cigar = strdup(alignment->cigar);
+    	  for (operations = 0; operations < alignment->num_cigar_operations; operations++) {
+    	      sscanf(&cigar[offset], "%i%c%n", &num, &car, &current_offset);
+    	      offset += current_offset;
+
+    	      if (car == 'M' || car == '=' || car == 'X') {
+    	        for (cont = 0; cont < num; cont++, pos++, pos_mod++) {
+
+    	        	alignment->sequence_mod[pos_mod] = alignment->sequence[pos];
+    	        	alignment->sequence_met[pos_mod] = meth_sequence[pos];
+
+
+    	        }
+
+    	   }
+    	    else{
+    	    	   if (car == 'D' || car == 'N') {
+    	    		   for (cont = 0; cont < num; cont++, pos_mod++) {
+
+    	    			   alignment->sequence_mod[pos_mod] = 'D';
+    	    			   alignment->sequence_met[pos_mod] = '.';
+
+    	    	   }
+
+    	      }
+    	      else {
+    	    	       if (car == 'I' || car == 'H' || car == 'S') {
+    	    	           pos+=num;
+
+    	    	       }
+    	    	   }
+
+
+    	  }
+    	  }
+
+    	  free(cigar);
+
     // If there exist hits inside the alignment interval, traverse the hits on the
     // interval and check the sequence for the corresponding nucleotides. If the
     // nucleotides corresponding to a hit are not methylated values (C for + strand or
@@ -303,15 +417,18 @@ void worker_process_alignment(worker_input_t* worker, alignment_t* alignment, si
     char meth_base, seq_base;
 
     if (inside_interval && meth_sequence) {
-      while (current_node->position < alignment->position + length - 1 && current_position < array_size - 1) {
-        seq_base = bam1_seqi(alignment->sequence, current_node->position - alignment->position);
-        meth_base = meth_sequence[current_node->position - alignment->position];
+      while (current_node->position < alignment->position + length - 1 && current_position < array_size + 1/*- 1*/) {  //OJO, el current_position vale uno de más, originalmente era -1, pero realmente es +1
+    /*    seq_base = bam1_seqi(alignment->sequence, current_node->position - alignment->position);
+        meth_base = meth_sequence[current_node->position - alignment->position];*/
+    	seq_base = alignment->sequence_mod[current_node->position - alignment->position];
+    	meth_base = alignment->sequence_met[current_node->position - alignment->position];
 
         if (meth_base != XM_NON_RELEVANT) {
           if (meth_base == XM_METHYLATED_CPG ||
               meth_base == XM_METHYLATED_CHG ||
               meth_base == XM_METHYLATED_CHH ||
-              meth_base == XM_METHYLATED_MUT) {
+              meth_base == XM_METHYLATED_MUT ||
+			  meth_base == XM_METHYLATED_CUN) {
             if (alignment->methylation_type == MC_QUEUE_INDEX) {
               current_node->mc_count++;
             } else {
@@ -344,7 +461,7 @@ void worker_process_alignment(worker_input_t* worker, alignment_t* alignment, si
           }
         }
 
-        current_node = &current_array[current_position++];
+        current_node = &current_array[current_position++]; //OJO Current position vale 1 más de los datos que tiene el current_node
       }
     }
 

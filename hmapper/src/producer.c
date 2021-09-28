@@ -361,12 +361,12 @@ alignment_t* producer_process_alignment(alignment_t* alignment, producer_input_t
             if (current_tag) {
               if (!strcmp(current_tag->tag, XM_TAG_NAME)) {
                 found_xm = 1;
-              } else if (!strcmp(current_tag->tag, ZM_TAG_NAME)) {
+              } /*else if (!strcmp(current_tag->tag, ZM_TAG_NAME)) {
                 if (bam_tag_get_int(current_tag) == 0) {
                   meth_test_passed = 0;
                   break;
                 }
-              }
+              }*/
             }
           }
         }

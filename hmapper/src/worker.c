@@ -131,6 +131,7 @@ int worker_stage_step(void* data, scheduler_input_t* scheduler) {
 
     while (current_alignment) {
       worker_process_alignment(worker_input, current_alignment, current_batch->type, scheduler, worker_input->pass_id);
+
       alignment_free(current_alignment);
 
       worker_input->temp_reads++;
@@ -230,6 +231,7 @@ void worker_process_alignment(worker_input_t* worker, alignment_t* alignment, si
 	  char car;
 	  int inser = 0;
 	  int pos_mod = 0;
+	  int pp = 0;
 	  char *cigar = strdup(alignment->cigar);
 	  for (operations = 0; operations < alignment->num_cigar_operations; operations++) {
 	      sscanf(&cigar[offset], "%i%c%n", &num, &car, &current_offset);
@@ -249,9 +251,12 @@ void worker_process_alignment(worker_input_t* worker, alignment_t* alignment, si
 	        	          raise(SIGINT);
 	        	        }
 	        	        #endif
-
-	        	        current_map[compressed_position] |= bit_map_mask[mask];
-	        	      }
+	        	        if (pos_mod<alignment->length){
+	        	        	current_map[compressed_position] |= bit_map_mask[mask];
+	        	        	}
+	        	        /*else{
+	        	        	pp = 5;
+	        	        }*/
 
 	        		    if (mask == 7) {
 	        		      ++compressed_position;
@@ -259,7 +264,7 @@ void worker_process_alignment(worker_input_t* worker, alignment_t* alignment, si
 	        		    } else {
 	        			    ++mask;
 	        		    }
-
+	        	 }
 	        }
 
 	   }
@@ -367,7 +372,11 @@ void worker_process_alignment(worker_input_t* worker, alignment_t* alignment, si
 
 
     //RICARDO - Incorporando el cigar
-    	  int cont, pos=0, operations, num;
+
+    char* sequence_mod = (char*) calloc(2*alignment->length + 1, sizeof(char)); //*2 for deleccions
+    char* sequence_met = (char*) calloc(2*alignment->length + 1, sizeof(char)); //*2 for deleccions
+
+    	int cont, pos=0, operations, num;
     	  int offset = 0, current_offset=0;
     	  char car;
     	  int inser = 0;
@@ -380,8 +389,8 @@ void worker_process_alignment(worker_input_t* worker, alignment_t* alignment, si
     	      if (car == 'M' || car == '=' || car == 'X') {
     	        for (cont = 0; cont < num; cont++, pos++, pos_mod++) {
 
-    	        	alignment->sequence_mod[pos_mod] = alignment->sequence[pos];
-    	        	alignment->sequence_met[pos_mod] = meth_sequence[pos];
+    	        	sequence_mod[pos_mod] = alignment->sequence[pos];
+    	        	sequence_met[pos_mod] = meth_sequence[pos];
 
 
     	        }
@@ -391,8 +400,8 @@ void worker_process_alignment(worker_input_t* worker, alignment_t* alignment, si
     	    	   if (car == 'D' || car == 'N') {
     	    		   for (cont = 0; cont < num; cont++, pos_mod++) {
 
-    	    			   alignment->sequence_mod[pos_mod] = 'D';
-    	    			   alignment->sequence_met[pos_mod] = '.';
+    	    			   sequence_mod[pos_mod] = 'D';
+    	    			   sequence_met[pos_mod] = '.';
 
     	    	   }
 
@@ -407,6 +416,12 @@ void worker_process_alignment(worker_input_t* worker, alignment_t* alignment, si
 
     	  }
     	  }
+    	  while(pos_mod < alignment->length)
+    	  {
+    		  sequence_mod[pos_mod] = 'R';	//Rellenamos secuencia
+    		  sequence_met[pos_mod] = '.';
+    		  pos_mod++;
+    	  }
 
     	  free(cigar);
 
@@ -420,8 +435,8 @@ void worker_process_alignment(worker_input_t* worker, alignment_t* alignment, si
       while (current_node->position < alignment->position + length - 1 && current_position < array_size + 1/*- 1*/) {  //OJO, el current_position vale uno de más, originalmente era -1, pero realmente es +1
     /*    seq_base = bam1_seqi(alignment->sequence, current_node->position - alignment->position);
         meth_base = meth_sequence[current_node->position - alignment->position];*/
-    	seq_base = alignment->sequence_mod[current_node->position - alignment->position];
-    	meth_base = alignment->sequence_met[current_node->position - alignment->position];
+    	seq_base = sequence_mod[current_node->position - alignment->position];
+    	meth_base = sequence_met[current_node->position - alignment->position];
 
         if (meth_base != XM_NON_RELEVANT) {
           if (meth_base == XM_METHYLATED_CPG ||
@@ -464,6 +479,10 @@ void worker_process_alignment(worker_input_t* worker, alignment_t* alignment, si
         current_node = &current_array[current_position++]; //OJO Current position vale 1 más de los datos que tiene el current_node
       }
     }
+
+    free(sequence_mod);
+    free(sequence_met);
+
 
     worker->second_stage_process += omp_get_wtime() - start_time;
   }

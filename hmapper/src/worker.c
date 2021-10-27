@@ -254,17 +254,15 @@ void worker_process_alignment(worker_input_t* worker, alignment_t* alignment, si
 	        	        if (pos_mod<alignment->length){
 	        	        	current_map[compressed_position] |= bit_map_mask[mask];
 	        	        	}
-	        	        /*else{
-	        	        	pp = 5;
-	        	        }*/
 
+	        	 }
 	        		    if (mask == 7) {
 	        		      ++compressed_position;
 	        			    mask = 0;
 	        		    } else {
 	        			    ++mask;
 	        		    }
-	        	 }
+
 	        }
 
 	   }
@@ -285,7 +283,7 @@ void worker_process_alignment(worker_input_t* worker, alignment_t* alignment, si
 
 	      }
 	      else {
-	    	       if (car == 'I' || car == 'H' || car == 'S') {
+	    	       if (car == 'I' /*|| car == 'H'*/ || car == 'S') {	//H no aparece en la secuencia, no avanzo
 	    	           pos+=num;
 
 	    	       }
@@ -407,7 +405,7 @@ void worker_process_alignment(worker_input_t* worker, alignment_t* alignment, si
 
     	      }
     	      else {
-    	    	       if (car == 'I' || car == 'H' || car == 'S') {
+    	    	       if (car == 'I' /*|| car == 'H' */|| car == 'S') {	//H no aparece en la secuencia, no hacemos nada
     	    	           pos+=num;
 
     	    	       }

@@ -221,8 +221,8 @@ void consumer_meth_array_serialize_mix(meth_array_node_t* array_f,
       c        = array_r[idx_r].c_count;
       nc       = array_r[idx_r].nc_count;
       mc       = array_r[idx_r].mc_count;
-      ch       = array_r[idx_f].ch_count;
-      nch      = array_r[idx_f].nch_count;
+      ch       = array_r[idx_r].ch_count;
+      nch      = array_r[idx_r].nch_count;
       hmc      = array_r[idx_r].hmc_count;
 
       idx_r++;

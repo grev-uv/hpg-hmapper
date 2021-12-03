@@ -241,7 +241,7 @@ void consumer_meth_array_serialize_mix(meth_array_node_t* array_f,
     }
 
     // write the position and coverage in file
-    if (c + mc > coverage || ch + hmc > coverage) {
+    if (c + mc >= coverage || ch + hmc >= coverage) {
       fprintf(fd, "%u%c%u%c%u%c%u%c%u%c%u%c%u%c", 
         position, delimiter, 
         c, delimiter, 
